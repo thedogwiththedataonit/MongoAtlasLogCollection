@@ -12,10 +12,11 @@ Datadogs agent gets installed on your infrastructure (VMs, EC2s) to collect syst
 
 ## Setting Up Mongo Credentials
 
-#### We have three main steps:
+#### We have four main steps:
 - Create an API Key
 - Grab the Atlas Project ID and Hosts
 - Clone and run the Agent Check
+- Add the Atlas credentials / variables and restart the agent
 
 ### Create an API Key in the Atlas Organization
 Go to the Organizations page and select Access manager in the left hand nav bar.
@@ -85,6 +86,15 @@ logs:
 | `min_collection_interval` | `int` | **Optional**. Collection is run every 5 minutes by default. Value in seconds. |
 | `port` | `int` | **Required**. Port the Agent Check submits. The Datadog Agent listens on a port for logs via TCP. Make sure this matches the logs.port section below. |
 
+---
+### Restart the Agent
+Once you have filled out this section, [restart the Datadog Agent](https://docs.datadoghq.com/agent/configuration/agent-commands/?tab=agentv6v7#restart-the-agent). 
+You can also access the [Datadog Agent Manager GUI](http://127.0.0.1:5002/) to restart and manage your agent (agent must be installed).
+
+![agentstatus](https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/P8uDXQOz/ee67a325-0d64-4895-83ae-3cd7aca1b4e1.jpg?v=8a39510fc8d03fee0f2cb17249b96b05)
+
+This is also where you can confirm that the integration is working correctly.
+
 ## API Reference
 
 #### Get Logs from a host
@@ -97,6 +107,7 @@ Using version 1, not sure why v2 wasn't working.
 ---
 
 ## Conclusion
+
 If you have any questions or insights to add on this solution please contact me at thomas.park@datadoghq.com
 
 
