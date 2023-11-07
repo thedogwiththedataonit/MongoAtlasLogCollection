@@ -1,0 +1,32 @@
+init_config:
+
+instances:
+    # Mongo hosts are the primary and secondary hosts in your replica set. Host names can be found in the Atlas UI in the overview page.
+  - hosts:
+      - <MONGO_HOST>
+      - <MONGO_HOST>
+    
+    # The Atlas Project ID can be found in the Atlas UI in the Organization -> Projects page. Clicking on the three dots in the right action column will show the project ID.
+    project_id: <PROJECT_ID>
+
+    # Create an API Key in the Organization Access Manager in Atlas. The public and private keys can be found in the Atlas UI in the Organization -> Access Manager page.
+    atlas_public_key: <ATLAS_API_PUBLIC_KEY>
+    atlas_private_key: <ATLAS_API_PRIVATE_KEY>
+
+    # Define the log names you want to collect. Valid log names are "mongodb", "mongos", "mongodb-audit-log", "mongos-audit-log". View here https://www.mongodb.com/docs/atlas/mongodb-logs/#in-the-download-logs-modal-edit-the-following-fields
+    log_names:
+      - mongodb
+      - mongodb-audit-log
+
+    # Define how often you want to poll the Atlas Admin API for logs. The check will run every x seconds and will collect all logs from the (current time - x seconds) to (current time).
+    min_collection_interval: 300
+
+    # Define the port you want to receive logs on. This port must be open on your host and defined down below in the logs section.
+    port: 10519
+    
+
+logs:
+  - type: tcp
+    port: 10519
+    service: mongo_atlas
+    source: mongodb
