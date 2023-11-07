@@ -12,9 +12,10 @@ Datadogs agent gets installed on your infrastructure (VMs, EC2s) to collect syst
 
 ## Setting Up Mongo Credentials
 
-#### We have four main steps:
+#### We have five main steps:
 - Create an API Key
 - Grab the Atlas Project ID and Hosts
+- Install the Datadog Agent and Enable Logs
 - Clone and run the Agent Check
 - Add the Atlas credentials / variables and restart the agent
 
@@ -40,11 +41,16 @@ Grab the hostname of the Mongo instance. Select the project that you want to col
 
 My cluster name is test so the host names are test-shard-*.1epsy.mongodb.net.
 
+
+### Install the Datadog Agent and Enable Logs
+
+Get started by [Installing the Datadog Agent](https://docs.datadoghq.com/agent/). Don't have an account? Sign up for a [trial here](https://www.datadoghq.com/free-datadog-trial/).
+
+To enable logs, go to the [datadog.yaml](https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7) (/etc/datadog-agent/datadog.yaml on linux) and [go to line 1106 to set **logs_enabled: true**](https://docs.datadoghq.com/agent/logs/?tab=tailfiles)
+
 ### Clone and run the Agent Check
 
-```git clone https://github.com/thedogwiththedataonit/MongoAtlasLogCollection.git```
-
-If you havent done so already - [Install the Datadog Agent](https://docs.datadoghq.com/agent/)
+```git clone https://github.com/thedogwiththedataonit/MongoAtlasLogCheck.git```
 
 Now we have to move two files into the agent to complete our custom agent check. Here are the steps:
 - Go to the [Agent Directory](https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory), ```/etc/datadog-agent/``` on linux.
@@ -89,7 +95,7 @@ logs:
 ---
 ### Restart the Agent
 Once you have filled out this section, [restart the Datadog Agent](https://docs.datadoghq.com/agent/configuration/agent-commands/?tab=agentv6v7#restart-the-agent). 
-You can also access the [Datadog Agent Manager GUI](http://127.0.0.1:5002/) to restart and manage your agent (agent must be installed).
+You can also access the Datadog Agent Manager GUI to restart and manage your agent (agent must be installed).
 
 ![agentstatus](https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/P8uDXQOz/ee67a325-0d64-4895-83ae-3cd7aca1b4e1.jpg?v=8a39510fc8d03fee0f2cb17249b96b05)
 
