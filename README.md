@@ -42,7 +42,7 @@ My cluster name is test so the host names are test-shard-*.1epsy.mongodb.net.
 
 ### Clone and run the Agent Check
 
-```git clone https://github.com/thedogwiththedataonit/MongoAtlasLogCheck.git```
+```git clone https://github.com/thedogwiththedataonit/MongoAtlasLogCollection.git```
 
 If you havent done so already - [Install the Datadog Agent](https://docs.datadoghq.com/agent/)
 
