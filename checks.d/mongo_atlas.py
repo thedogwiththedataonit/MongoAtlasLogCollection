@@ -10,8 +10,8 @@ base_url = "https://cloud.mongodb.com/api/atlas/v1.0/"
 
 class HelloCheck(AgentCheck):
   def check(self, instance):
-    atlas_user = instance['atlas_user']
-    atlas_user_key = instance['atlas_user_key']
+    atlas_user = instance['atlas_public_key']
+    atlas_user_key = instance['atlas_private_key']
     project_id = instance['project_id']
     mongo_hosts = instance['hosts']
     log_names= instance['log_names']
