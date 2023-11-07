@@ -2,12 +2,11 @@ init_config:
 
 instances:
   - hosts:
-      - test-shard-00-02.1epsy.mongodb.net
-      - test-shard-00-00.1epsy.mongodb.net
-      - test-shard-00-01.1epsy.mongodb.net
-    project_id: 6541e4266198482188735eb2
-    atlas_public_key: qqrsvjpf
-    atlas_private_key: 3cfdb2b6-cfb0-4700-b564-4528c3e1a526
+      - <MONGO_HOST>
+      - <MONGO_HOST>
+    project_id: <PROJECT_ID>
+    atlas_public_key: <ATLAS_API_PUBLIC_KEY>
+    atlas_private_key: <ATLAS_API_PRIVATE_KEY>
     log_names:
       - mongodb
       - mongodb-audit-log

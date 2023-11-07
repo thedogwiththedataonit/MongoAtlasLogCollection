@@ -34,11 +34,8 @@ def get_recent_logs(auth, project_id, mongodb_host, log_name, time_interval, por
 
 def send_logs_to_agent_listener(logs, port):
     host = "127.0.0.1"
-
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((host, port))
     client_socket.sendall(logs)
     client_socket.close()
     return
-
-send_logs_to_agent_listener("hello", 10519)
