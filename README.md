@@ -1,27 +1,104 @@
-# https://cloud.mongodb.com/api/atlas/v2/groups/{groupId}/clusters/{hostName}/logs/{logName}.gz
+
+# Collecting and Submiting MongoDB Atlas Logs to Datadog
+![Atlas Logs](https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/p9uYZXQo/fee610bc-86e1-44e5-aaf4-c36cdec5fb5f.jpg?v=adb56fc3106e90c15d9b6695eb4844f9)
+---
+MongoDB Atlas currently offer two methods to collect logs: via the [MongoDB Atlas UI](https://www.mongodb.com/docs/atlas/mongodb-logs/) or via the [MongoDB Admin API](https://www.mongodb.com/docs/atlas/reference/api-resources-spec/v2/). While Datadog has a web integration with MongoDB to pull metrics from Atlas, pulling logs are not supported at this time (10/23). 
+
+For this reason, this repo will walk you through how to use the Datadog agent to collect MongoDB Atlas logs via the API through Datadogs [Custom Agent Check](https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6v7).
 
 
-# Create an API Key in an Organization
+### What is a Custom Agent Check?
+Datadogs agent gets installed on your infrastructure (VMs, EC2s) to collect system metrics and offers integration specific metrics (redis metrics, postgres metrics, iis metrics, nginx metrics, self hosted mongo metrics, etc) which can be enabled in the agent configuration. However, you can create your own checks to run a python script that performs any task. Essentially, the agent runs cron jobs that run a python script at a set interval.
+
+## Setting Up Mongo Credentials
+
+#### We have three main steps:
+- Create an API Key
+- Grab the Atlas Project ID and Hosts
+- Clone and run the Agent Check
+
+### Create an API Key in the Atlas Organization
 Go to the Organizations page and select Access manager in the left hand nav bar.
 
-Click on "Create API Key" (button) on the right.
+![API Key](https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/GGuy5E1r/59a1c008-e835-4011-812a-3faf0f7767ab.jpg?v=64a657e20bd727ce481edaeeaf32311a)
 
-Once created, copy the Public and Private Key. Make sure to also add an API Access List (list or range of IPs that will be able to make this connection). If you do not add an IP Address, all IPs will be allowed.
+Create a new API Key. The API Key must have the Project Monitoring Admin role.
 
-Grab the Project ID (group ID)
+Once created, copy the Public and Private Key. You can also add an API Access List (list or range of IPs that will be able to make this connection). If you do not add an IP Address, all IPs will be allowed.
 
-Grab the hostname of the Mongo instance. I went to the monitoring page and grabbed the primary DB host name.
+### Grab the Atlas Project ID and Hosts
 
-Define a logName, this will be the label that identifies what log file you want to return.
-- mongodb
-- mongos
-- mongodb-audit-log
-- mongos-audit-log
-For Audit related logs, enable Databse Auditing. https://www.mongodb.com/docs/atlas/database-auditing/?_ga=2.254145608.1132057786.1698961418-1230547859.1697058332&_gac=1.213446246.1698075413.CjwKCAjws9ipBhB1EiwAccEi1IsAddZZYNJ5NT6cakHHFu3Z9BLUaECj9f5VvuOoDdAmNH4E7CoyLhoC9fUQAvD_BwE
+Grab the Project ID from the Organization projects page.
 
-# Submission Methods
-- Write to a File, Datadog Agent tails
-- Submit via HTTP
-- Agent Check
+![ProjectId](https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/4guRXZk8/c95af086-dac1-4379-99aa-ea01c552bea5.jpg?source=viewer&v=0ba993e4d828ca733ca8fdf9fe019813)
+---
+Grab the hostname of the Mongo instance. Select the project that you want to collect logs for and go the the Database tab. Click on monitoring and go to the overview tab to see the instance (host) names for your cluster.
 
-# MongoAtlasLogCheck
+![Hosts](https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/p9uYZ6d8/c1fb033c-de4b-486e-83dd-d6d168f988fa.jpg?v=763bc9b0d6ce3fb71348986f2d462452)
+---
+
+My cluster name is test so the host names are test-shard-*.1epsy.mongodb.net.
+
+### Clone and run the Agent Check
+
+```git clone https://github.com/thedogwiththedataonit/MongoAtlasLogCheck.git```
+
+If you havent done so already - [Install the Datadog Agent](https://docs.datadoghq.com/agent/)
+
+Now we have to move two files into the agent to complete our custom agent check. Here are the steps:
+- Go to the [Agent Directory](https://docs.datadoghq.com/agent/configuration/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory), ```/etc/datadog-agent/``` on linux.
+- Move [mongo_atlas.py](https://github.com/thedogwiththedataonit/MongoAtlasLogCollection/blob/main/checks.d/mongo_atlas.py) into -> ```/etc/datadog-agent/checks.d```
+- Move the entire directory [mongo_atlas.d](https://github.com/thedogwiththedataonit/MongoAtlasLogCollection/tree/main/conf.d) (including the conf.yaml file) into -> ```/etc/datadog-agent/conf.d```
+
+### Adding Configurations into mongo_atlas.d/conf.yaml file
+Input the API Key credentials, log names, hosts, and the project ID.
+```
+init_config:
+
+instances:
+  - hosts:
+      - <MONGO_HOST>
+      - <MONGO_HOST>
+    project_id: <PROJECT_ID>
+    atlas_public_key: <ATLAS_API_PUBLIC_KEY>
+    atlas_private_key: <ATLAS_API_PRIVATE_KEY>
+    log_names:
+      - mongodb
+      - mongodb-audit-log
+    min_collection_interval: 300
+    port: 10519
+    
+
+logs:
+  - type: tcp
+    port: 10519
+    service: "mongo_atlas"
+    source: "mongodb"
+```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `<MONGO_HOST>` | `string` | **Required**. The primary or secondary MongoDB host found in the MongoDB Metrics Overview page. |
+| `<PROJECT_ID>` | `string` | **Required**. The The Atlas Project ID can be found in the Atlas UI in the Organization -> Projects page. |
+| `<ATLAS_API_PUBLIC_KEY>` | `string` | **Required**. Atlas API Public Key |
+| `log_names` | `list` | **Required**. The log names you want to collect. Valid log names are ["mongodb", "mongos", "mongodb-audit-log", "mongos-audit-log"](https://www.mongodb.com/docs/atlas/mongodb-logs/#in-the-download-logs-modal-edit-the-following-fields) |
+| `min_collection_interval` | `int` | **Optional**. Collection is run every 5 minutes by default. Value in seconds. |
+| `port` | `int` | **Required**. Port the Agent Check submits. The Datadog Agent listens on a port for logs via TCP. Make sure this matches the logs.port section below. |
+
+## API Reference
+
+#### Get Logs from a host
+The python check runs a get request to the following endpoint with a digest auth header. View the [API here](https://www.mongodb.com/docs/atlas/reference/api-resources-spec/v2/#tag/Monitoring-and-Logs/operation/getHostLogs).
+```http
+  GET https://cloud.mongodb.com/api/atlas/v1.0/groups/{project_id}/clusters/{mongodb_host}/logs/{log_name}.gz?startDate={start_time}&endDate={end_time}"
+```
+Using version 1, not sure why v2 wasn't working.
+
+---
+
+## Conclusion
+If you have any questions or insights to add on this solution please contact me at thomas.park@datadoghq.com
+
+
+
+
